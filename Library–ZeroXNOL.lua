@@ -5347,10 +5347,9 @@ end
     end
 
     Library.Window = function(self, Config)
-    Data = Data or { }
     Config = Config or {}
     
-    
+    -- ✅ 在这里添加自适应变量
     local BaseResolution = Vector2.new(1920, 1080)
     local Camera = workspace.CurrentCamera
     
