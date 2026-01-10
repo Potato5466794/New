@@ -5349,6 +5349,11 @@ end
     Library.Window = function(self, Config)
     Config = Config or {}
     
+    Config.Title = Config.Title or "Default Title"
+    Config.Size = Config.Size or UDim2.new(0, 500, 0, 400)
+    Config.Center = Config.Center ~= false  -- 默认true
+    Config.AutoShow = Config.AutoShow ~= false  -- 默认true
+    
     -- ✅ 在这里添加自适应变量
     local BaseResolution = Vector2.new(1920, 1080)
     local Camera = workspace.CurrentCamera
@@ -5411,19 +5416,21 @@ end
             Items["Window"].Instance.Visible = false
 
             Items["Logo"] = Instances:Create("ImageLabel", {
-                Parent = Items["Side"].Instance,
-                Name = "\0",
-                ImageColor3 = FromRGB(202, 243, 255),
-                ScaleType = Enum.ScaleType.Fit,
-                BorderColor3 = FromRGB(0, 0, 0),
-                AnchorPoint = Vector2New(0.5, 0),
-                Image = "rbxassetid://" .. Window.Logo,
-                BackgroundTransparency = 1,
-                Position = UDim2New(0.5, 0, 0, 12),
-                Size = UDim2New(0, 75, 0, 75),
-                BorderSizePixel = 0,
-                BackgroundColor3 = FromRGB(255, 255, 255)
-            })  Items["Logo"]:AddToTheme({ImageColor3 = "Accent"})
+    Parent = Items["Side"].Instance,
+    Name = "\0",
+    ImageColor3 = FromRGB(202, 243, 255),
+    ScaleType = Enum.ScaleType.Fit,
+    BorderColor3 = FromRGB(0, 0, 0),
+    AnchorPoint = Vector2New(0.5, 0),
+    
+    Image = Window.Logo and ("rbxassetid://" .. Window.Logo) or "",
+    BackgroundTransparency = 1,
+    Position = UDim2New(0.5, 0, 0, 12),
+    Size = UDim2New(0, 75, 0, 75),
+    BorderSizePixel = 0,
+    BackgroundColor3 = FromRGB(255, 255, 255)
+})
+  Items["Logo"]:AddToTheme({ImageColor3 = "Accent"})
 
             Items["Search"] = Instances:Create("Frame", {
                 Parent = Items["Side"].Instance,
