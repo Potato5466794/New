@@ -5135,43 +5135,17 @@ end
     Library.InventoryViewer = function(self)
         local Viewer = { }
         Viewer.Items = { } 
-Items["Main"] = Instances:Create("Frame", {
-    Parent = Library.Holder.Instance,
-    Name = "\0",
-    Position = UDim2New(0.5, 0, 0.5, 0),
-    AnchorPoint = Vector2New(0.5, 0.5),
-    Size = Config.Size or UDim2New(0, 751, 0, 539),
-    BorderColor3 = FromRGB(12, 12, 12),
-    BackgroundColor3 = FromRGB(14, 17, 15),
-    BorderSizePixel = 2
-})
-Items["Main"]:AddToTheme({BackgroundColor3 = "Background", BorderColor3 = "Border"})
-Items["Main"]:MakeDraggable()
 
-
-
-Items["UIScale"] = Instances:Create("UIScale", {
-    Parent = Items["Main"].Instance,
-    Name = "\0",
-    Scale = 1
-})
-
-local function UpdateScale()
-    local ViewportSize = Camera.ViewportSize
-    local ScaleX = ViewportSize.X / BaseResolution.X
-    local ScaleY = ViewportSize.Y / BaseResolution.Y
-    local Scale = math.min(ScaleX, ScaleY)
-    
-    Items["UIScale"].Instance.Scale = Scale
-end
-
-UpdateScale()
-
-Camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
-    UpdateScale()
-end)
-
-
+        local Items = { } do
+            Items["InventoryViewer"] = Instances:Create("Frame", {
+                Parent = Library.Holder.Instance,
+                Name = "\0",
+                Position = UDim2New(0.007766990456730127, 0, 0.11442785710096359, 0),
+                BorderColor3 = FromRGB(12, 12, 12),
+                Size = UDim2New(0, 325, 0, 277),
+                BorderSizePixel = 2,
+                BackgroundColor3 = FromRGB(14, 17, 15)
+            })  Items["InventoryViewer"]:AddToTheme({BackgroundColor3 = "Background", BorderColor3 = "Border"})
 
             Instances:Create("UIStroke", {
                 Parent = Items["InventoryViewer"].Instance,
@@ -5377,8 +5351,8 @@ end)
     Config = Config or {}
     
     
-    local BaseResolution = Vector2.new(1920, 1080)  -- 基准分辨率
-    local Camera = workspace.CurrentCamera           -- 获取相机
+    local BaseResolution = Vector2.new(1920, 1080)
+    local Camera = workspace.CurrentCamera
     
     
     local Window = {
@@ -5391,13 +5365,38 @@ end)
    
 
         local Items = Components:Window({
-            Parent = Library.Holder,
-            Draggable = true,
-            Resizeable = true,
-            AnchorPoint = Vector2New(0, 0),
-            Position = UDim2New(0, Camera.ViewportSize.X / 3.3, 0, Camera.ViewportSize.Y / 3.3),
-            Size = Window.Size
-        }) do
+    Parent = Library.Holder,
+    Draggable = true,
+    Resizeable = true,
+    AnchorPoint = Vector2New(0, 0),
+    Position = UDim2New(0, Camera.ViewportSize.X / 3.3, 0, Camera.ViewportSize.Y / 3.3),
+    Size = Config.Size or UDim2New(0, 751, 0, 539)
+}) do
+    -- ✅ 在这里添加 UIScale
+    Items["UIScale"] = Instances:Create("UIScale", {
+        Parent = Items["Window"].Instance,  -- ⚠️ 注意这里是 Items["Window"] 而不是 Items["Main"]
+        Name = "\0",
+        Scale = 1
+    })
+
+    -- ✅ 添加自适应函数
+    local function UpdateScale()
+        local ViewportSize = Camera.ViewportSize
+        local ScaleX = ViewportSize.X / BaseResolution.X
+        local ScaleY = ViewportSize.Y / BaseResolution.Y
+        local Scale = math.min(ScaleX, ScaleY)
+        
+        Items["UIScale"].Instance.Scale = Scale
+    end
+
+  
+    UpdateScale()
+
+   
+    Camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+        UpdateScale()
+    end)
+
             Items["Side"] = Instances:Create("Frame", {
                 Parent = Items["Window"].Instance,
                 Name = "\0",
