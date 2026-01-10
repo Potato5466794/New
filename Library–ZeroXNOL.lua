@@ -1,10 +1,4 @@
---[[
-    scoot ui library
-    made by samet
-    remade by anhchangm52
-    
-    example/documentation is at the bottom
-]]
+
 
 if Library then
     Library:Unload()
@@ -4830,6 +4824,158 @@ local Library do
 
         return KeybindList
     end
+
+Library.UIToggle = function(self, Window)
+    local UIToggle = {
+        IsLocked = false
+    }
+
+    local Items = {} do
+        Items["UIToggle"] = Instances:Create("Frame", {
+            Parent = Library.Holder.Instance,
+            Name = "\0",
+            AnchorPoint = Vector2New(0, 0),
+            Position = UDim2New(0, 12, 0, 12),
+            BorderColor3 = FromRGB(12, 12, 12),
+            Size = UDim2New(0, 80, 0, 70),
+            BorderSizePixel = 2,
+            BackgroundColor3 = FromRGB(14, 17, 15)
+        })  Items["UIToggle"]:AddToTheme({BackgroundColor3 = "Background", BorderColor3 = "Border"})
+
+        Items["UIToggle"]:MakeDraggable()
+
+        Instances:Create("UIStroke", {
+            Parent = Items["UIToggle"].Instance,
+            Name = "\0",
+            Color = FromRGB(42, 49, 45),
+            LineJoinMode = Enum.LineJoinMode.Miter,
+            ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        }):AddToTheme({Color = "Outline"})
+
+        Instances:Create("UIPadding", {
+            Parent = Items["UIToggle"].Instance,
+            Name = "\0",
+            PaddingTop = UDimNew(0, 5),
+            PaddingBottom = UDimNew(0, 5),
+            PaddingRight = UDimNew(0, 5),
+            PaddingLeft = UDimNew(0, 5)
+        })
+
+        Instances:Create("UIListLayout", {
+            Parent = Items["UIToggle"].Instance,
+            Name = "\0",
+            Padding = UDimNew(0, 5),
+            SortOrder = Enum.SortOrder.LayoutOrder,
+            HorizontalAlignment = Enum.HorizontalAlignment.Center
+        })
+
+        -- Toggle Button
+        Items["ToggleButton"] = Instances:Create("TextButton", {
+            Parent = Items["UIToggle"].Instance,
+            Name = "\0",
+            FontFace = Library.Font,
+            TextColor3 = FromRGB(235, 235, 235),
+            BorderColor3 = FromRGB(12, 12, 12),
+            Text = "Toggle",
+            AutoButtonColor = false,
+            Size = UDim2New(1, 0, 0, 25),
+            BorderSizePixel = 2,
+            TextSize = 9,
+            BackgroundColor3 = FromRGB(30, 36, 31)
+        })  Items["ToggleButton"]:AddToTheme({BackgroundColor3 = "Element", BorderColor3 = "Border", TextColor3 = "Text"})
+
+        Instances:Create("UIStroke", {
+            Parent = Items["ToggleButton"].Instance,
+            Name = "\0",
+            Color = FromRGB(42, 49, 45),
+            LineJoinMode = Enum.LineJoinMode.Miter,
+            ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        }):AddToTheme({Color = "Outline"})
+
+        Items["ToggleButton"]:TextBorder()
+
+        -- Lock Button
+        Items["LockButton"] = Instances:Create("TextButton", {
+            Parent = Items["UIToggle"].Instance,
+            Name = "\0",
+            FontFace = Library.Font,
+            TextColor3 = FromRGB(235, 235, 235),
+            BorderColor3 = FromRGB(12, 12, 12),
+            Text = "Lock",
+            AutoButtonColor = false,
+            Size = UDim2New(1, 0, 0, 25),
+            BorderSizePixel = 2,
+            TextSize = 9,
+            BackgroundColor3 = FromRGB(30, 36, 31)
+        })  Items["LockButton"]:AddToTheme({BackgroundColor3 = "Element", BorderColor3 = "Border", TextColor3 = "Text"})
+
+        Instances:Create("UIStroke", {
+            Parent = Items["LockButton"].Instance,
+            Name = "\0",
+            Color = FromRGB(42, 49, 45),
+            LineJoinMode = Enum.LineJoinMode.Miter,
+            ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        }):AddToTheme({Color = "Outline"})
+
+        Items["LockButton"]:TextBorder()
+    end
+
+    -- Toggle Button Click
+    Items["ToggleButton"]:Connect("MouseButton1Click", function()
+        Window:SetOpen(not Window.IsOpen)
+    end)
+
+    -- Lock Button Click
+    Items["LockButton"]:Connect("MouseButton1Click", function()
+        UIToggle.IsLocked = not UIToggle.IsLocked
+        
+        if UIToggle.IsLocked then
+            Items["LockButton"].Instance.Text = "Unlock"
+            Items["UIToggle"].Instance.Active = false
+            Items["LockButton"]:ChangeItemTheme({BackgroundColor3 = "Accent"})
+            Items["LockButton"]:Tween(nil, {BackgroundColor3 = Library.Theme.Accent})
+        else
+            Items["LockButton"].Instance.Text = "Lock"
+            Items["UIToggle"].Instance.Active = true
+            Items["LockButton"]:ChangeItemTheme({BackgroundColor3 = "Element"})
+            Items["LockButton"]:Tween(nil, {BackgroundColor3 = Library.Theme.Element})
+        end
+    end)
+
+    -- Hover effects for Toggle Button
+    Items["ToggleButton"]:OnHover(function()
+        Items["ToggleButton"]:ChangeItemTheme({BackgroundColor3 = "Hovered Element"})
+        Items["ToggleButton"]:Tween(nil, {BackgroundColor3 = Library.Theme["Hovered Element"]})
+    end)
+
+    Items["ToggleButton"]:OnHoverLeave(function()
+        Items["ToggleButton"]:ChangeItemTheme({BackgroundColor3 = "Element"})
+        Items["ToggleButton"]:Tween(nil, {BackgroundColor3 = Library.Theme.Element})
+    end)
+
+    -- Hover effects for Lock Button (only when not locked)
+    Items["LockButton"]:OnHover(function()
+        if not UIToggle.IsLocked then
+            Items["LockButton"]:ChangeItemTheme({BackgroundColor3 = "Hovered Element"})
+            Items["LockButton"]:Tween(nil, {BackgroundColor3 = Library.Theme["Hovered Element"]})
+        end
+    end)
+
+    Items["LockButton"]:OnHoverLeave(function()
+        if not UIToggle.IsLocked then
+            Items["LockButton"]:ChangeItemTheme({BackgroundColor3 = "Element"})
+            Items["LockButton"]:Tween(nil, {BackgroundColor3 = Library.Theme.Element})
+        end
+    end)
+
+    function UIToggle:SetVisibility(Bool)
+        Items["UIToggle"].Instance.Visible = Bool
+    end
+
+    return UIToggle
+end
+
+
 
     Library.Notification = function(self, Title, Description, Duration)
         local Items = { } do 
