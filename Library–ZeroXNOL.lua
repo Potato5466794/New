@@ -4830,6 +4830,10 @@ Library.UIToggle = function(self, Window)
         IsLocked = false
     }
 
+    
+    local BaseResolution = Vector2.new(1920, 1080)
+    local Camera = workspace.CurrentCamera
+
     local Items = {} do
         Items["UIToggle"] = Instances:Create("Frame", {
             Parent = Library.Holder.Instance,
@@ -4918,25 +4922,52 @@ Library.UIToggle = function(self, Window)
         }):AddToTheme({Color = "Outline"})
 
         Items["LockButton"]:TextBorder()
+
+      
+        Items["UIScale"] = Instances:Create("UIScale", {
+            Parent = Items["UIToggle"].Instance,
+            Name = "\0",
+            Scale = 1
+        })
     end
+
+    
+    local function UpdateScale()
+        local ViewportSize = Camera.ViewportSize
+        local ScaleX = ViewportSize.X / BaseResolution.X
+        local ScaleY = ViewportSize.Y / BaseResolution.Y
+        local Scale = math.min(ScaleX, ScaleY)
+        
+        Items["UIScale"].Instance.Scale = Scale
+    end
+
+    
+    UpdateScale()
+
+    
+    Camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+        UpdateScale()
+    end)
 
     -- Toggle Button Click
     Items["ToggleButton"]:Connect("MouseButton1Click", function()
         Window:SetOpen(not Window.IsOpen)
     end)
 
-    -- Lock Button Click
+    -- Lock Button Click (锁定主UI)
     Items["LockButton"]:Connect("MouseButton1Click", function()
         UIToggle.IsLocked = not UIToggle.IsLocked
         
         if UIToggle.IsLocked then
             Items["LockButton"].Instance.Text = "Unlock"
-            Items["UIToggle"].Instance.Active = false
+            -- 锁定主窗口的拖动
+            Window.Items["Main"].Instance.Active = false
             Items["LockButton"]:ChangeItemTheme({BackgroundColor3 = "Accent"})
             Items["LockButton"]:Tween(nil, {BackgroundColor3 = Library.Theme.Accent})
         else
             Items["LockButton"].Instance.Text = "Lock"
-            Items["UIToggle"].Instance.Active = true
+            -- 解锁主窗口的拖动
+            Window.Items["Main"].Instance.Active = true
             Items["LockButton"]:ChangeItemTheme({BackgroundColor3 = "Element"})
             Items["LockButton"]:Tween(nil, {BackgroundColor3 = Library.Theme.Element})
         end
@@ -4953,7 +4984,7 @@ Library.UIToggle = function(self, Window)
         Items["ToggleButton"]:Tween(nil, {BackgroundColor3 = Library.Theme.Element})
     end)
 
-    -- Hover effects for Lock Button (only when not locked)
+    -- Hover effects for Lock Button
     Items["LockButton"]:OnHover(function()
         if not UIToggle.IsLocked then
             Items["LockButton"]:ChangeItemTheme({BackgroundColor3 = "Hovered Element"})
@@ -5104,17 +5135,43 @@ end
     Library.InventoryViewer = function(self)
         local Viewer = { }
         Viewer.Items = { } 
+Items["Main"] = Instances:Create("Frame", {
+    Parent = Library.Holder.Instance,
+    Name = "\0",
+    Position = UDim2New(0.5, 0, 0.5, 0),
+    AnchorPoint = Vector2New(0.5, 0.5),
+    Size = Config.Size or UDim2New(0, 751, 0, 539),
+    BorderColor3 = FromRGB(12, 12, 12),
+    BackgroundColor3 = FromRGB(14, 17, 15),
+    BorderSizePixel = 2
+})
+Items["Main"]:AddToTheme({BackgroundColor3 = "Background", BorderColor3 = "Border"})
+Items["Main"]:MakeDraggable()
 
-        local Items = { } do
-            Items["InventoryViewer"] = Instances:Create("Frame", {
-                Parent = Library.Holder.Instance,
-                Name = "\0",
-                Position = UDim2New(0.007766990456730127, 0, 0.11442785710096359, 0),
-                BorderColor3 = FromRGB(12, 12, 12),
-                Size = UDim2New(0, 325, 0, 277),
-                BorderSizePixel = 2,
-                BackgroundColor3 = FromRGB(14, 17, 15)
-            })  Items["InventoryViewer"]:AddToTheme({BackgroundColor3 = "Background", BorderColor3 = "Border"})
+
+
+Items["UIScale"] = Instances:Create("UIScale", {
+    Parent = Items["Main"].Instance,
+    Name = "\0",
+    Scale = 1
+})
+
+local function UpdateScale()
+    local ViewportSize = Camera.ViewportSize
+    local ScaleX = ViewportSize.X / BaseResolution.X
+    local ScaleY = ViewportSize.Y / BaseResolution.Y
+    local Scale = math.min(ScaleX, ScaleY)
+    
+    Items["UIScale"].Instance.Scale = Scale
+end
+
+UpdateScale()
+
+Camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+    UpdateScale()
+end)
+
+
 
             Instances:Create("UIStroke", {
                 Parent = Items["InventoryViewer"].Instance,
@@ -5315,19 +5372,23 @@ end
         return Viewer
     end
 
-    Library.Window = function(self, Data)
-        Data = Data or { }
-
-        local Window = { 
-            Logo = Data.Logo or Data.logo or "",
-            FadeTime = Data.FadeTime or Data.fadetime or 0.4,
-            Size = Data.Size or Data.size or UDim2New(0, 751, 0, 539),
-
-            Pages = { },
-            Items = { },
-
-            IsOpen = false,
-        }
+    Library.Window = function(self, Config)
+    Data = Data or { }
+    Config = Config or {}
+    
+    
+    local BaseResolution = Vector2.new(1920, 1080)  -- 基准分辨率
+    local Camera = workspace.CurrentCamera           -- 获取相机
+    
+    
+    local Window = {
+        IsOpen = true,
+        Items = {},
+        Tabs = {},
+        SelectedTab = nil
+    }
+    
+   
 
         local Items = Components:Window({
             Parent = Library.Holder,
