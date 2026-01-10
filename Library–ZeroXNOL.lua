@@ -4830,10 +4830,6 @@ Library.UIToggle = function(self, Window)
         IsLocked = false
     }
 
-    
-    local BaseResolution = Vector2.new(1920, 1080)
-    local Camera = workspace.CurrentCamera
-
     local Items = {} do
         Items["UIToggle"] = Instances:Create("Frame", {
             Parent = Library.Holder.Instance,
@@ -4922,32 +4918,7 @@ Library.UIToggle = function(self, Window)
         }):AddToTheme({Color = "Outline"})
 
         Items["LockButton"]:TextBorder()
-
-      
-        Items["UIScale"] = Instances:Create("UIScale", {
-            Parent = Items["UIToggle"].Instance,
-            Name = "\0",
-            Scale = 1
-        })
     end
-
-    
-    local function UpdateScale()
-        local ViewportSize = Camera.ViewportSize
-        local ScaleX = ViewportSize.X / BaseResolution.X
-        local ScaleY = ViewportSize.Y / BaseResolution.Y
-        local Scale = math.min(ScaleX, ScaleY)
-        
-        Items["UIScale"].Instance.Scale = Scale
-    end
-
-    
-    UpdateScale()
-
-    
-    Camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
-        UpdateScale()
-    end)
 
     -- Toggle Button Click
     Items["ToggleButton"]:Connect("MouseButton1Click", function()
@@ -4984,7 +4955,7 @@ Library.UIToggle = function(self, Window)
         Items["ToggleButton"]:Tween(nil, {BackgroundColor3 = Library.Theme.Element})
     end)
 
-    -- Hover effects for Lock Button
+    -- Hover effects for Lock Button (only when not locked)
     Items["LockButton"]:OnHover(function()
         if not UIToggle.IsLocked then
             Items["LockButton"]:ChangeItemTheme({BackgroundColor3 = "Hovered Element"})
@@ -5346,61 +5317,28 @@ end
         return Viewer
     end
 
-    Library.Window = function(self, Config)
-    Config = Config or {}
-    
-    Config.Title = Config.Title or "Default Title"
-    Config.Size = Config.Size or UDim2.new(0, 500, 0, 400)
-    Config.Center = Config.Center ~= false  -- 默认true
-    Config.AutoShow = Config.AutoShow ~= false  -- 默认true
-    
-    -- ✅ 在这里添加自适应变量
-    local BaseResolution = Vector2.new(1920, 1080)
-    local Camera = workspace.CurrentCamera
-    
-    
-    local Window = {
-        IsOpen = true,
-        Items = {},
-        Tabs = {},
-        SelectedTab = nil
-    }
-    
-   
+    Library.Window = function(self, Data)
+        Data = Data or { }
+
+        local Window = { 
+            Logo = Data.Logo or Data.logo or "",
+            FadeTime = Data.FadeTime or Data.fadetime or 0.4,
+            Size = Data.Size or Data.size or UDim2New(0, 751, 0, 539),
+
+            Pages = { },
+            Items = { },
+
+            IsOpen = false,
+        }
 
         local Items = Components:Window({
-    Parent = Library.Holder,
-    Draggable = true,
-    Resizeable = true,
-    AnchorPoint = Vector2New(0, 0),
-    Position = UDim2New(0, Camera.ViewportSize.X / 3.3, 0, Camera.ViewportSize.Y / 3.3),
-    Size = Config.Size or UDim2New(0, 751, 0, 539)
-}) do
-    -- ✅ 在这里添加 UIScale
-    Items["UIScale"] = Instances:Create("UIScale", {
-        Parent = Items["Window"].Instance,  -- ⚠️ 注意这里是 Items["Window"] 而不是 Items["Main"]
-        Name = "\0",
-        Scale = 1
-    })
-
-    -- ✅ 添加自适应函数
-    local function UpdateScale()
-        local ViewportSize = Camera.ViewportSize
-        local ScaleX = ViewportSize.X / BaseResolution.X
-        local ScaleY = ViewportSize.Y / BaseResolution.Y
-        local Scale = math.min(ScaleX, ScaleY)
-        
-        Items["UIScale"].Instance.Scale = Scale
-    end
-
-  
-    UpdateScale()
-
-   
-    Camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
-        UpdateScale()
-    end)
-
+            Parent = Library.Holder,
+            Draggable = true,
+            Resizeable = true,
+            AnchorPoint = Vector2New(0, 0),
+            Position = UDim2New(0, Camera.ViewportSize.X / 3.3, 0, Camera.ViewportSize.Y / 3.3),
+            Size = Window.Size
+        }) do
             Items["Side"] = Instances:Create("Frame", {
                 Parent = Items["Window"].Instance,
                 Name = "\0",
@@ -5416,21 +5354,19 @@ end
             Items["Window"].Instance.Visible = false
 
             Items["Logo"] = Instances:Create("ImageLabel", {
-    Parent = Items["Side"].Instance,
-    Name = "\0",
-    ImageColor3 = FromRGB(202, 243, 255),
-    ScaleType = Enum.ScaleType.Fit,
-    BorderColor3 = FromRGB(0, 0, 0),
-    AnchorPoint = Vector2New(0.5, 0),
-    
-    Image = Window.Logo and ("rbxassetid://" .. Window.Logo) or "",
-    BackgroundTransparency = 1,
-    Position = UDim2New(0.5, 0, 0, 12),
-    Size = UDim2New(0, 75, 0, 75),
-    BorderSizePixel = 0,
-    BackgroundColor3 = FromRGB(255, 255, 255)
-})
-  Items["Logo"]:AddToTheme({ImageColor3 = "Accent"})
+                Parent = Items["Side"].Instance,
+                Name = "\0",
+                ImageColor3 = FromRGB(202, 243, 255),
+                ScaleType = Enum.ScaleType.Fit,
+                BorderColor3 = FromRGB(0, 0, 0),
+                AnchorPoint = Vector2New(0.5, 0),
+                Image = "rbxassetid://" .. Window.Logo,
+                BackgroundTransparency = 1,
+                Position = UDim2New(0.5, 0, 0, 12),
+                Size = UDim2New(0, 75, 0, 75),
+                BorderSizePixel = 0,
+                BackgroundColor3 = FromRGB(255, 255, 255)
+            })  Items["Logo"]:AddToTheme({ImageColor3 = "Accent"})
 
             Items["Search"] = Instances:Create("Frame", {
                 Parent = Items["Side"].Instance,
